@@ -41,17 +41,17 @@ class Game:
 		self.week = int(week)
 		self.away = away
 		self.home = home
-		self.points = float(points)#Spread relative to the home team
-		self.prob = (1 - self.CONV[self.points]) if self.points >= 0 else self.CONV[-1 * self.points]
-		#self.prob is the probability that the home team wins
+		self.points = float(points)#Spread relative to the away team
+		self.prob = self.CONV[abs(self.points)]
+		#self.prob is the probability that the favorite wins
 
 	def __repr__(self):
 		wk = "Week " + str(self.week) + ": "
 		match = self.away + " at " + self.home
 		if self.points > 0:
-			spr = " (" + self.away + " -" + str(self.points) + ")"
+			spr = " (" + self.home + " -" + str(self.points) + ")"
 		elif self.points < 0:
-			spr = " (" + self.home + " " + str(self.points) + ")"
+			spr = " (" + self.away + " " + str(self.points) + ")"
 		else:
 			spr = " (PK)."
 		return wk + match + spr
@@ -75,6 +75,14 @@ class Season:
 	def last_week(self):
 		return max(self.weeks())
 
+	def print_picks(self, picks):
+		for pick in picks:
+			#Find game
+			w = picks.index(pick) + 1
+			g = filter(lambda g: g.week == w and pick in (g.away, g.home), self.games)
+			#print it
+			print g[0], g[0].prob
+
 class PickSet:
 	TEAMS = ("ATL", "DEN", "SD", "PHI", "WAS", "JAC", "CHI", "CIN", "NE", "BAL", "NYG", "CAR",
 		"NO", "DAL", "GB", "IND", "HOU", "PIT", "MIA", "CLE", "TEN", "SF", "BUF", "LA", "DET",
@@ -87,7 +95,7 @@ class PickSet:
 		self.picks = used + [None] * (17 - len(used))
 
 	def __repr__(self):
-		return '\t'.join(filter(lambda i: i is not None, self.picks))
+		return ' '.join(filter(lambda i: i is not None, self.picks))
 
 	def add_greedy_week(self):
 		#Add the best game from the first unpicked week to self.picks
@@ -134,9 +142,23 @@ class PickSet:
 		if return_many:
 			combinations.sort(key=lambda i: -1 * cum_prob(i))
 			return combinations[:return_many]
-		return max(combinations, key=lambda i: -1 * cum_prob(i))
+		return max(combinations, key=lambda i: cum_prob(i))
 
 	def fill_exhaustive(self, threshold = -5):
 		exh = self.exhaustive(threshold)
 		for game in exh:
 			self.picks[game.week - 1] = game.favorite()
+
+	def compare_options(self, threshold = 5, until = 17, depth = 500):
+		'''Returns a list (team, p) with teams and est probabilities of getting a perfect set until <until>
+		if you start with team <team>.'''
+		options = self.exhaustive(threshold, until, depth)
+		teams = []
+		result = []
+		for option in options:
+			team = option[0].favorite()
+			if team not in teams:
+				teams.append(team)
+				result.append((team, cum_prob(option)))
+		for i in result:
+			print i[0] + '\t' + i[1]
