@@ -37,7 +37,7 @@ class Game:
 		for team in (away, home):
 			assert team in self.TEAMS, "Did not recognize team %s." % team
 		assert -1 * float(points) in self.CONV or float(points) in self.CONV, "No probability stored for %d points." % float(points)
-		assert int(week) in range(18)[1:], "There is no week %s." % str(week)
+		assert int(week) in range(19)[1:], "There is no week %s." % str(week)
 		self.week = int(week)
 		self.away = away
 		self.home = home
@@ -161,4 +161,4 @@ class PickSet:
 				teams.append(team)
 				result.append((team, cum_prob(option)))
 		for i in result:
-			print i[0] + '\t' + i[1]
+			print i[0] + '\t' + "%2d" % i[1]

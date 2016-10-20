@@ -39,7 +39,8 @@ def usage_distribution(path):
 
 if __name__ == "__main__":
 	recent = recent_pick("data/prevpicks.tsv")
-	print "PICKS THIS WEEK:"
+	s = sum([i[1] for i in recent])
+	print "PICKS THIS WEEK (%d): " % s
 	for r in recent:
 		print str(r[0]) + "\t" + str(r[1])
 	print "USAGE IN FIELD:"
