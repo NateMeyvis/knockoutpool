@@ -1,5 +1,3 @@
-import sys
-
 def get_powerrankings(power = "data/powerrankings.tsv"):
 	with open(power, 'r') as f:
 		d = {}
